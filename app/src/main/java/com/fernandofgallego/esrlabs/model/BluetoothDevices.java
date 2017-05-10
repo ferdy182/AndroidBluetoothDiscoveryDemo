@@ -6,6 +6,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.util.Log;
 
 /**
  * Created by ferdy182 on 10/5/17.
@@ -22,6 +23,8 @@ public class BluetoothDevices {
 
         // Register for broadcasts when a device is discovered.
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
+        filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
+        filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
         context.registerReceiver(mReceiver, filter);
     }
 
@@ -39,17 +42,19 @@ public class BluetoothDevices {
                 // Discovery has found a device. Get the BluetoothDevice
                 // object and its info from the Intent.
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                String deviceName = device.getName();
-                String deviceHardwareAddress = device.getAddress(); // MAC address
-
+                Log.i("BT", "Discovered device " + device.getName());
                 if(callback != null) {
-                    callback.onDevicesFound(deviceName, deviceHardwareAddress);
+                    callback.onDevicesFound(device);
                 }
+            } else if(BluetoothAdapter.ACTION_DISCOVERY_STARTED.equals(action)) {
+                Log.i("BT", "Discovery started");
+            } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
+                Log.i("BT", "Discovery finished");
             }
         }
     };
 
     public interface DevicesCallback {
-        void onDevicesFound(String deviceName, String deviceHardwareAddress);
+        void onDevicesFound(BluetoothDevice device);
     }
 }
